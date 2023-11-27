@@ -229,33 +229,95 @@ imgTarget.forEach((img) => imgObserver.observe(img));
 
 // Slider component
 //this involves creating a container for the slides, adding navigation buttons, and handling the logic to transition between slides.
-const slides = document.querySelectorAll(".slide");
-const btnLeft = document.querySelector(".slider__btn--left");
-const btnRight = document.querySelector(".slider__btn--right");
+const slider = function () {
+  const slides = document.querySelectorAll(".slide");
+  const btnLeft = document.querySelector(".slider__btn--left");
+  const btnRight = document.querySelector(".slider__btn--right");
+  const dotContainer = document.querySelector(".dots");
 
-let curSlide = 0;
-const maxSlide = slides.length;
+  let curSlide = 0; //current active slide index at 0
+  const maxSlide = slides.length; // No of slides
 
-const slider = document.querySelector(".slider");
-slider.style.transform = "scale(.4)translateX(-800px)";
-slider.style.overflow = "visible";
+  // Functions
+  const createDots = function () {
+    slides.forEach(function (_, i) {
+      dotContainer.insertAdjacentHTML(
+        "beforeend",
+        `<button class="dots__dot" data-slide="${i}"></button>`
+      );
+    });
+  };
+  // The createDots function Creates navigation dots based on the number of slides and appends them to the dotContainer.
 
-slides.forEach((s, i) => (s.style.transform = `translateX(${100 * i}%)`));
-// 0%,100%, 200%, 300%
+  const activateDot = function (slide) {
+    document
+      .querySelectorAll(".dots__dot")
+      .forEach((dot) => dot.classList.remove("dots__dot--active"));
 
-// Next slide
-btnRight.addEventListener("click", function () {
-  if (curSlide === maxSlide - 1) {
-    curSlide = 0;
-  } else {
-    curSlide++;
-  }
+    document
+      .querySelector(`.dots__dot[data-slide="${slide}"]`)
+      .classList.add("dots__dot--active");
+  };
+  // The activateDot function Removes the 'dots__dot--active' class from all dots and adds it to the dot corresponding to the current slide.
 
-  slides.forEach(
-    (s, i) => (s.style.transform = `translateX(${100 * (i - curSlide)}%)`)
-  );
-});
-16mins 45sec
+  const goToSlide = function (slide) {
+    slides.forEach(
+      (s, i) => (s.style.transform = `translateX(${100 * (i - slide)}%)`)
+    );
+  };
+  // The gotoSlide function Transforms each slide horizontally to create a sliding effect, making the current slide visible.
+
+  // Next slide
+  // The next and previous slide function updates the curSlide variable and call goToSlide and activateDot accordingly for the next and previous slides.
+  const nextSlide = function () {
+    if (curSlide === maxSlide - 1) {
+      curSlide = 0;
+    } else {
+      curSlide++;
+    }
+
+    goToSlide(curSlide);
+    activateDot(curSlide);
+  };
+
+  const prevSlide = function () {
+    if (curSlide === 0) {
+      curSlide = maxSlide - 1;
+    } else {
+      curSlide--;
+    }
+    goToSlide(curSlide);
+    activateDot(curSlide);
+  };
+
+  const init = function () {
+    goToSlide(0);
+    createDots();
+
+    activateDot(0);
+  };
+  init();
+  // Init function Initializes the slider by setting the initial state, creating navigation dots, and activating the first dot.
+
+  // Event handlers
+  btnRight.addEventListener("click", nextSlide);
+  btnLeft.addEventListener("click", prevSlide);
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowLeft") prevSlide();
+    e.key === "ArrowRight" && nextSlide();
+  });
+
+  dotContainer.addEventListener("click", function (e) {
+    if (e.target.classList.contains("dots__dot")) {
+      const { slide } = e.target.dataset;
+      goToSlide(slide);
+      activateDot(slide);
+    }
+  });
+};
+// The Event handlers Listens for click events on the left and right buttons, keyboard arrow keys, and dots to trigger slide navigation.
+slider();
 //////////////////////////////////////////////
 /*
 // Selecting Elements
@@ -461,3 +523,18 @@ console.log(h1.parentElement.children);
   // Initiates a loop over each element in the array.
 });
 */
+// Lifecycle DOM Events
+// HTML and JS loaded
+document.addEventListener("DOMContentLoaded", function (e) {
+  console.log("HTML parsed and DOM tree built!", e);
+});
+// Whole page, CSS, Images
+window.addEventListener("load", function (e) {
+  console.log("Page fully Loaded", e);
+});
+
+// window.addEventListener("beforeunload", function (e) {
+//   e.preventDefault();
+//   console.log(e);
+//   e.returnValue = "";
+// });
