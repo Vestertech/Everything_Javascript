@@ -215,29 +215,176 @@ ford.accelerate();
 ford.brake();
 ford.speedUS = 50;
 console.log(ford);
-*/
+
 
 ///////////////////////////////////////
 // Inheritance Between "Classes": Constructor Functions
 
 const Person = function (firstName, birthYear) {
+  // Instances
   this.firstName = firstName;
   this.birthYear = birthYear;
 };
-
+// Method
 Person.prototype.calcAge = function () {
   console.log(2037 - this.birthYear);
 };
 
+// Constructor Fxn for creating student Object
 const Student = function (firstName, birthYear, course) {
+  // Call the Person constructor to initialize common properties
   Person.call(this, firstName, birthYear);
   this.course = course;
 };
 
+// Linking prototype for inheritance...............
+Student.prototype = Object.create(Person.prototype);
+// Method
 Student.prototype.introduce = function () {
   console.log(`My name is ${this.firstName} and I study ${this.course}`);
 };
 
-const Mike = new Student("Mike", 2020, "Computer Science");
-Mike.introduce();
-// 14mins
+// instance of student..
+const mike = new Student("Mike", 2020, "Computer Science");
+mike.introduce();
+mike.calcAge();
+
+console.log(mike.__proto__);
+console.log(mike.__proto__.__proto__);
+
+console.log(mike instanceof Student);
+console.log(mike instanceof Person);
+console.log(mike instanceof Object);
+
+// Restoring the constructor property to point back to student
+Student.prototype.constructor = Student;
+
+// Inspecting the constructor property
+console.dir(Student.prototype.constructor);
+
+// Coding Challenge 3
+
+const Car = function (make, speed) {
+  // instances
+  this.make = make;
+  this.speed = speed;
+};
+// Methods
+Car.prototype.accelerate = function () {
+  this.speed += 10;
+  console.log(`${this.make} is accelerating. New speed:${this.speed} km/h`);
+};
+// Methods
+Car.prototype.brake = function () {
+  this.speed -= 5;
+  console.log(`${this.make} is braking. New speed:${this.speed} km/h`);
+};
+
+// EV
+// EV is a constructor function for creating objects representing electric vehicles (EVs).
+// It takes parameters make, speed, and charge, and initializes the corresponding properties using Car.call(this, make, speed) to reuse the initialization logic from the Car constructor.;
+const EV = function (make, speed, charge) {
+  // Initializing common ppts of Car
+  Car.call(this, make, speed);
+  this.charge = charge;
+};
+
+// linking prototypes for Inheritance
+EV.prototype = Object.create(Car.prototype);
+
+EV.prototype.chargeBattery = function (chargeTo) {
+  this.charge = chargeTo;
+};
+// Polymorphism in place, overwriting parent method...
+EV.prototype.accelerate = function () {
+  this.speed += 20;
+  this.charge--;
+  console.log(
+    `${this.make} is going at ${this.speed} km/h with a charge of ${this.charge}. `
+  );
+};
+// Creating Instance of EV
+const tesla = new EV("Tesla", 120, 22);
+
+// Using Method from both CAR and EV, while Observing Polymorphism
+tesla.chargeBattery(90);
+console.log(tesla);
+tesla.brake();
+tesla.accelerate();
+
+*/
+
+class PersonCl {
+  // The constructor method is used to initialize object properties when an instance of the class is created.
+
+  constructor(fullName, birthYear) {
+    this.fullName = fullName;
+    this.birthYear = birthYear;
+  }
+  // Methods will be added to .prototype property
+  calcAge() {
+    console.log(2023 - this.birthYear);
+  }
+
+  greet() {
+    console.log(`Hello ${this.fullName}`);
+  }
+  get() {
+    return 2037 - this.birthYear;
+  }
+  set fullName(name) {
+    console.log(name);
+    if (name.includes(" ")) this._fullName = name;
+    else alert(`${name} is not a full name!`);
+    // set fullName is a setter method that checks if the provided name is a full name (contains a space) before setting the _fullName property. If not, it shows an alert.
+  }
+  get fullName() {
+    return this._fullName;
+  }
+
+  // Static Method
+  static hey() {
+    console.log("Hey There 🙌");
+    console.log(this);
+    // static hey is a static method, meaning it is called on the class itself, not on instances of the class. It logs a greeting and the value of this (which refers to the class itself).
+  }
+}
+
+class StudentCl extends PersonCl {
+  constructor(fullName, birthYear, course) {
+    super(fullName, birthYear);
+    this.course = course;
+  }
+
+  introduce() {
+    console.log(`My name is ${this.fullName} and I study ${this.course}`);
+  }
+
+  calcAge() {
+    console.log(
+      ` I'm ${
+        2023 - this.birthYear
+      } years old, but as a student i feel more like ${
+        2023 - this.birthYear + 10
+      } year old!`
+    );
+  }
+}
+// Creating and using instances
+const martha = new StudentCl("Martha Elsie", 2012, "Computer Science");
+martha.introduce();
+martha.calcAge();
+
+const PersonProto = {
+  calcAge() {
+    console.log(2037 - this.birthYear);
+  },
+
+  init(firstName, birthYear) {
+    this.firstName = firstName;
+    this.birthYear = birthYear;
+  },
+};
+
+const steven = Object.create(PersonProto);
+// 18>2mins
