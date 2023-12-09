@@ -312,7 +312,7 @@ console.log(tesla);
 tesla.brake();
 tesla.accelerate();
 
-*/
+
 
 class PersonCl {
   // The constructor method is used to initialize object properties when an instance of the class is created.
@@ -375,7 +375,11 @@ const martha = new StudentCl("Martha Elsie", 2012, "Computer Science");
 martha.introduce();
 martha.calcAge();
 
+//////////////////////////////////////
+// Inheritance between 'Classes' : Object.create
+
 const PersonProto = {
+  // This is an obj representing a prototype for creating person-like obj.
   calcAge() {
     console.log(2037 - this.birthYear);
   },
@@ -385,6 +389,170 @@ const PersonProto = {
     this.birthYear = birthYear;
   },
 };
-
+// instance
 const steven = Object.create(PersonProto);
-// 18>2mins
+
+const studentProto = Object.create(PersonProto);
+studentProto.init = function (firstName, birthYear, course) {
+  PersonProto.init.call(this, firstName, birthYear);
+  this.course = course;
+};
+
+studentProto.introduce = function () {
+  console.log(`My name is ${this.firstName} and i study ${this.course}`);
+};
+
+const jay = Object.create(studentProto);
+jay.init("Jay", 2010, "Computer Science");
+jay.introduce();
+jay.calcAge();
+
+
+// Another class example Using the bank app we built earlier
+
+class Account {
+  // 1) Public Field, Not found on prototypes but on instances
+  locale = navigator.language;
+
+  // 2) Private fields,
+  #movements = [];
+  #pin;
+  constructor(owner, currency, pin) {
+    this.owner = owner;
+    this.#pin = pin;
+    this.currency = currency;
+    // Privated/ protected
+    // this._movements = [];
+    // this.locale = navigator.language;
+    console.log(`Thanks for opening an account with us ${owner}`);
+  }
+  // 3) Public Methods
+  // Methods/ Public interface (API)
+  getMovements() {
+    return this.#movements;
+  }
+  deposit(val) {
+    this.#movements.push(val);
+    return this;
+  }
+
+  withdraw(val) {
+    this.deposit(-val);
+    return this;
+  }
+
+  requestLoan(val) {
+    if (this._approveLoan(val)) {
+      this.deposit(val);
+      console.log("Loan Approved!");
+      return this;
+    }
+  }
+  // Static not available on instances but on classes...
+  static helper() {
+    console.log(`Helper`);
+  }
+  // 4) private methods are useful to hide implementation from the outside.........
+  // #approveLoan(val) {
+  _approveLoan(val) {
+    return true;
+  }
+}
+
+const acct1 = new Account("Ifeanyi", "#", 1111);
+
+acct1.deposit(250);
+acct1.withdraw(140);
+acct1.requestLoan(1000);
+acct1._approveLoan(1000);
+console.log(acct1.getMovements());
+console.log(acct1);
+Account.helper();
+
+// console.log(acc1.#movements);
+// console.log(acc1.#pin);
+
+// Chaining
+acct1.deposit(300).deposit(500).withdraw(35).requestLoan(2500).withdraw(4000);
+
+*/
+
+///////////////////////////////////////
+// Coding Challenge #4
+
+//
+// 1. Re-create challenge #3, but this time using ES6 classes: create an 'EVCl' child class of the 'CarCl' class
+// 2. Make the 'charge' property private;
+// 3. Implement the ability to chain the 'accelerate' and 'chargeBattery' methods of this class, and also update the 'brake' method in the 'CarCl' class. They experiment with chining!
+
+class CarCl {
+  // CarCl is a class representing a conventional car.
+  // The constructor takes make and speed parameters and initializes corresponding properties.
+  // It has methods accelerate and brake to modify the speed property.
+  // The brake method returns the current instance (this) to allow method chaining.
+  // It has a getter (speedUS) and a setter (speedUS) for converting speed between kilometers per hour and miles per hour.
+  constructor(make, speed) {
+    // instances
+    this.make = make;
+    this.speed = speed;
+  }
+
+  // Methods
+  accelerate() {
+    this.speed += 10;
+    console.log(`${this.make} is accelerating. New speed:${this.speed} km/h`);
+  }
+  // Methods
+  brake() {
+    this.speed -= 5;
+    console.log(`${this.make} is braking. New speed:${this.speed} km/h`);
+    return this;
+  }
+  get speedUS() {
+    return this.speed / 1.6;
+  }
+  set speedUS(speed) {
+    this.speed = speed * 1.6;
+  }
+}
+
+class EVCl extends CarCl {
+  #charge;
+  constructor(make, speed, charge) {
+    // Initializing common ppts of Car
+    super(make, speed);
+    this.#charge = charge;
+  }
+
+  chargeBattery(chargeTo) {
+    this.#charge = chargeTo;
+    return this;
+
+    // returns current instance to allow for chaining
+  }
+
+  accelerate() {
+    this.speed += 20;
+    this.#charge--;
+    console.log(
+      `${this.make} is going at ${this.speed} km/h with a charge of ${
+        this.#charge
+      }. `
+    );
+    return this;
+  }
+}
+
+// Creating Instance of EVCl
+const rivian = new EVCl("rivian", 120, 23);
+console.log(rivian);
+
+rivian
+  .accelerate()
+  .accelerate()
+  .accelerate()
+  .brake()
+  .chargeBattery(50)
+  .accelerate();
+
+console.log(rivian.speedUS);
