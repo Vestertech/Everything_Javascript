@@ -127,6 +127,8 @@ class App {
   _showForm(mapE) {
     this.#mapEvent = mapE;
     form.classList.remove("hidden");
+    // On small screens the sidebar sits below the map
+    form.scrollIntoView({ behavior: "smooth", block: "nearest" });
     inputDistance.focus();
   }
   _hideForm() {
