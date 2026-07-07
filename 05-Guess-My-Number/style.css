@@ -117,3 +117,24 @@ h1 {
 .label-score {
   margin-bottom: 2rem;
 }
+
+/* GITHUB LINK */
+.github-link {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  font-family: inherit;
+  font-size: 1.2rem;
+  color: #eee;
+  text-decoration: none;
+  border: 3px solid #eee;
+  padding: 1.2rem 1.6rem;
+  transition: all 0.2s;
+}
+
+.github-link:hover,
+.github-link:focus-visible {
+  background-color: #eee;
+  color: #222;
+  outline: none;
+}
