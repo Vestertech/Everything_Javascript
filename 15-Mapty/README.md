@@ -1,66 +1,47 @@
-# Workout Tracker App
+# Mapty — Map Your Workouts 🏃‍♂️🚴‍♂️
 
-![Workout Tracker](<[logo.png](https://www.istockphoto.com/photo/woman-running-in-the-park-in-early-morning-gm1403386875-455964810)>)
+A workout tracker built with vanilla JavaScript. Click anywhere on the map to log a running or cycling workout — it appears as a marker with a popup and as a card in the sidebar, and everything is saved in your browser between visits.
 
-## Overview
+**Live demo:** https://claude.ai/code/artifact/70c0201a-cebd-4c41-83a3-68cd63baa1b3
+_(The demo runs in a sandbox that blocks external requests, so it draws a stylized offline canvas map instead of real OpenStreetMap tiles.)_
 
-Welcome to the Workout Tracker App! This application is designed to help users track their running and cycling workouts, visualize their workout data on an interactive map, and maintain a record of their fitness activities.
+## Features
 
-## Key Features
+- **Interactive map** — powered by [Leaflet](https://leafletjs.com/) 1.9.4 with OpenStreetMap tiles. Click the map to open the workout form.
+- **Two workout types** — running (with cadence, pace auto-calculated in min/km) and cycling (with elevation gain, speed auto-calculated in km/h). The form fields switch automatically with the type.
+- **Geolocation** — the map opens at your current position, with a graceful fallback to a default location if permission is denied or unavailable.
+- **Input validation** — distance, duration, and cadence must be positive numbers; you get an alert if they aren't.
+- **Persistence** — workouts are stored in `localStorage` and rebuilt as proper `Running`/`Cycling` class instances on reload (prototype chain and `Date` restored, not just plain JSON objects).
+- **Click to pan** — click a workout card in the sidebar and the map flies to its marker.
 
-- **User-Friendly Interface:** Easily record your workouts through a simple and intuitive user interface.
+## Running It
 
-- **Interactive Map:** View your workout locations on an interactive map powered by the Leaflet library.
+No build step, no dependencies to install — Leaflet loads from a CDN.
 
-- **Geolocation:** Take advantage of the Geolocation API to automatically detect and set your current position.
+1. Open `index.html` in a browser (or serve the folder: `npx serve .`).
+2. Allow location access when prompted (optional — a default location is used otherwise).
+3. Click the map, fill in the form, press <kbd>Enter</kbd>.
 
-- **Data Persistence:** Your workout data is stored in the browser's local storage, ensuring your progress is saved even when you reload the page.
+To wipe all saved workouts, run `app.reset()` in the DevTools console.
 
-- **Dynamic Rendering:** See immediate updates as your workouts are dynamically rendered both on the map and in the workout list.
+## Architecture
 
-## Usage
+Everything lives in `script.js`, organized around four classes:
 
-1. **Getting Started:**
+```
+Workout            base class: id, date, coords, distance, duration, description
+├── Running        + cadence, calcPace()
+└── Cycling        + elevationGain, calcSpeed()
 
-   - Clone the repository: `git clone https://github.com/Vestertech/Everything_Javascript/tree/main/15-Mapty.git`
-   - Open `index.html` in your preferred web browser.
+App                the controller: owns the Leaflet map, the workout array,
+                   and all event handling / rendering / localStorage I/O
+```
 
-2. **Record a Workout:**
+The `App` class wires up the whole flow: get position → load map → click map → show form → submit → create workout → render marker + list card → persist. Private class fields (`#map`, `#workouts`, `#mapEvent`) keep the state encapsulated.
 
-   - Click on the map to add a new workout.
-   - Fill in the workout details in the form and submit.
-
-3. **View Your Workouts:**
-
-   - See your workouts displayed on the map as markers.
-   - Check the workout list for a detailed overview of each activity.
-
-4. **Data Persistence:**
-   - Your workout data is stored locally, providing a seamless experience across sessions.
-
-## Customization
-
-Feel free to customize this application according to your preferences. You can modify the UI, add new features, or integrate additional libraries to enhance functionality.
-
-## Development
-
-To further develop and enhance the Workout Tracker App:
-
-1. Install dependencies: `npm install` (if applicable).
-2. Make changes and test the application locally.
-3. Share your improvements with the community by submitting pull requests.
+The original architecture diagrams from the course are in this folder: `Mapty-architecture-final.png` and `Mapty-flowchart.png`.
 
 ## Credits
 
-- This application utilizes the Leaflet library for interactive maps.
-- Emoji icons are sourced from [EmojiOne](https://emojione.com/).
-- Special thanks to my Tutor, Jonas Schmedtmann, for invaluable lectures and support.
--
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
-
-## Acknowledgments
-
-- Special thanks to Sylvester Eziagor for contributing to the development of this application.
+- Project design and course by [Jonas Schmedtmann]
+- Implementation, fixes, and enhancements by [Sylvester Eziagor](https://twitter.com/YOUwooded).

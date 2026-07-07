@@ -6,7 +6,7 @@ const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 // let map, mapEvent;
 class Workout {
   date = new Date();
-  id = (Date.now() + " ").slice(-10);
+  id = (Date.now() + "").slice(-10);
   clicks = 0;
 
   constructor(coords, distance, duration) {
@@ -18,7 +18,7 @@ class Workout {
     // prettier-ignore
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-    this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on${
+    this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${
       months[this.date.getMonth()]
     } ${this.date.getDate()}`;
   }
@@ -55,9 +55,9 @@ class Cycling extends Workout {
     return this.speed;
   }
 }
-const run1 = new Running([39, -12], 5.2, 24, 178);
-const cycling1 = new Cycling([39, -12], 27, 95, 523);
-console.log(run1, cycling1);
+// const run1 = new Running([39, -12], 5.2, 24, 178);
+// const cycling1 = new Cycling([39, -12], 27, 95, 523);
+// console.log(run1, cycling1);
 //////////////////////////////////
 // APPLICATION ARCHITECTURE
 
@@ -87,13 +87,18 @@ class App {
     containerWorkouts.addEventListener("click", this._moveToPopup.bind(this));
   }
   _getPosition() {
+    // Fall back to a default location so the app still works
+    // when geolocation is denied or unavailable
+    const loadDefault = () => {
+      alert(`Could not get your current location! Showing default location.`);
+      this._loadMap({ coords: { latitude: 6.5244, longitude: 3.3792 } });
+    };
     if (navigator.geolocation)
       navigator.geolocation.getCurrentPosition(
         this._loadMap.bind(this),
-        function () {
-          alert(`Could not get your current location!`);
-        }
+        loadDefault
       );
+    else loadDefault();
   }
   _loadMap(position) {
     const { latitude } = position.coords;
@@ -106,7 +111,7 @@ class App {
     // console.log(this);
     this.#map = L.map("map").setView(coords, this.#mapZoomLevel);
 
-    L.tileLayer("https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(this.#map);
@@ -123,7 +128,6 @@ class App {
     this.#mapEvent = mapE;
     form.classList.remove("hidden");
     inputDistance.focus();
-    console.log("form shown");
   }
   _hideForm() {
     // Clear Input fields
@@ -174,7 +178,7 @@ class App {
         !validInputs(distance, duration, elevation) ||
         !allPositive(distance, duration)
       )
-        return "Inputs have to be positive numbers!";
+        return alert("Inputs have to be positive numbers!");
       workout = new Cycling([lat, lng], distance, duration, elevation);
     }
 
@@ -262,8 +266,9 @@ class App {
     form.insertAdjacentHTML("afterend", html);
   }
   _moveToPopup(e) {
+    // Map may not be loaded yet when a stored workout is clicked
+    if (!this.#map) return;
     const workoutEl = e.target.closest(".workout");
-    console.log(workoutEl);
 
     if (!workoutEl) return;
     const workout = this.#workouts.find(
@@ -288,8 +293,16 @@ class App {
 
     if (!data) return;
 
-    // restore workouts data = []
-    this.#workouts = data;
+    // restore workouts data = [], rebuilding the prototype chain
+    // (JSON.parse returns plain objects, so methods like click() would be lost)
+    this.#workouts = data.map((work) => {
+      Object.setPrototypeOf(
+        work,
+        work.type === "running" ? Running.prototype : Cycling.prototype
+      );
+      work.date = new Date(work.date);
+      return work;
+    });
 
     this.#workouts.forEach((work) => {
       this._renderWorkout(work);
